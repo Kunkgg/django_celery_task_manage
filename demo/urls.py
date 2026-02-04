@@ -8,4 +8,5 @@ from django.urls import path, include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("long_time_task.urls")),
+    path("api/", include("cmetrics_history.urls")),
 ]
