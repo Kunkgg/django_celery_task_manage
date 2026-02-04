@@ -16,6 +16,13 @@ from .registry import LongTimeTaskRegister
 logger = logging.getLogger(__name__)
 
 
+def _debug_log_task_registry():
+    """调试日志：记录当前进程中的任务注册表"""
+    all_tasks = LongTimeTaskRegister.get_all_tasks()
+    logger.info(f"[DEBUG] 当前已注册的任务: {list(all_tasks.keys())}")
+    return all_tasks
+
+
 @shared_task(
     bind=True,
     autoretry_for=(ConnectionError, TimeoutError),
@@ -42,8 +49,16 @@ def execute_long_time_task(self, task_id: int):
         task.save(update_fields=["state", "start_at", "celery_task_id"])
 
         # 获取任务配置
+        # 调试日志：查看任务注册表状态
+        all_tasks = _debug_log_task_registry()
+        logger.info(f"[DEBUG] 正在查找任务类型: {task.task_type}")
+        logger.info(f"[DEBUG] 任务注册表内容: {all_tasks}")
+        
         task_config = LongTimeTaskRegister.get_task(task.task_type)
+        logger.info(f"[DEBUG] 获取到的任务配置: {task_config}")
+        
         if not task_config:
+            logger.error(f"[DEBUG] 任务类型 '{task.task_type}' 未在注册表中找到！")
             raise ValueError(f"Unknown task type: {task.task_type}")
 
         # 解析任务参数

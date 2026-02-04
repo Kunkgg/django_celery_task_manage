@@ -1,0 +1,31 @@
+POST http://localhost:8000/api/tasks/
+
+{
+    "task_type": "file_processing",
+    "params": {
+        "file_path": "/path/to/file.txt",
+        "duration": 5,
+        "complexity": "high",
+        "report_type": "test_summary"
+    }
+}
+
+###
+
+POST http://localhost:8000/api/tasks/
+
+{
+    "task_type": "data_analysis",
+    "params": {
+        "dataset_id": 123,
+        "analysis_type": "basic"
+    }
+}
+
+###
+
+GET http://localhost:8000/api/task-types/
+
+###
+
+GET http://localhost:8000/api/tasks/list/

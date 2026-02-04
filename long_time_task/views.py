@@ -203,3 +203,61 @@ class TaskListView(View):
                 "total_pages": paginator.num_pages,
             }
         )
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class TaskTypeListView(View):
+    """任务类型列表API"""
+
+    def get(self, request):
+        """
+        获取所有已注册的任务类型
+
+        Response:
+        {
+            "code": 0,
+            "message": "success",
+            "data": {
+                "task_types": [
+                    {
+                        "name": "data_analysis",
+                        "description": "数据分析任务",
+                        "timeout": 7200,
+                        "queue": "heavy"
+                    }
+                ]
+            }
+        }
+        """
+        try:
+            all_tasks = LongTimeTaskRegister.get_all_tasks()
+
+            task_types = []
+            for task_type, config in all_tasks.items():
+                task_types.append({
+                    "name": task_type,
+                    "description": config.description,
+                    "timeout": config.timeout,
+                    "soft_timeout": config.soft_timeout,
+                    "max_retries": config.max_retries,
+                    "queue": config.queue,
+                    "priority": config.priority,
+                })
+
+            return JsonResponse({
+                "code": 0,
+                "message": "success",
+                "data": {
+                    "task_types": task_types
+                }
+            })
+
+        except Exception as e:
+            logger.exception("Error getting task types")
+            return JsonResponse({
+                "code": 500,
+                "message": str(e),
+                "data": {
+                    "task_types": []
+                }
+            }, status=500)
